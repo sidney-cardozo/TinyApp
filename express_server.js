@@ -28,9 +28,13 @@ function generateRandomString(){
 app.post("/login", (req, res) =>{
   // let loginName = req.body.username;
   res.cookie('username', req.body.username);
-  console.log(res.cookies);
   res.redirect("/urls");
 
+})
+
+app.post("/logout", (req,res) =>{
+  res.clearCookie("username");
+  res.redirect("/urls");
 })
 app.get("/", (req, res) => {
   res.end("Hello!");

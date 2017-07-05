@@ -6,5 +6,8 @@
   </form>
 <%} else{ %>
   <h3>Hi <%= username %>!</h3>
+  <form action="/logout" method="POST">
+      <button type="logout" value="Logout" class="bg-warning">Logout</button>
+  </form>
 <% } %>
 <h1> Welcome to TinyApp!!! </h1>
