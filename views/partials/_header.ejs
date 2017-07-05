@@ -1,1 +1,10 @@
+
+<% if(!username){ %>
+  <form action="/login" method="POST">
+    <input id="username" type="text" name="username" placeholder="Your Username" style="alignment: right;"/>
+          <button type="update" value="Update" class="bg-warning">Update</button>
+  </form>
+<%} else{ %>
+  <h3>Hi <%= username %>!</h3>
+<% } %>
 <h1> Welcome to TinyApp!!! </h1>
