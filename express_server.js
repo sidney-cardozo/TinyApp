@@ -74,8 +74,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user : users[req.cookies["user_id"]]};
-  res.render("urls_new", templateVars);
+  if(req.cookies["user_id"]){
+    let templateVars = { user : users[req.cookies["user_id"]]};
+    res.render("urls_new", templateVars);
+  }else{
+    res.redirect("/login");
+  }
+
 });
 
 app.get("/urls.json", (req, res) => {res.json(urlDatabase);});
