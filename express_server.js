@@ -45,15 +45,28 @@ function emailExistsInDB(email){
   return false;
 }
 
-app.post("/login", (req, res) =>{
-  // let loginName = req.body.username;
-  res.cookie('username', req.body.username);
-  res.redirect("/urls");
+function userForAnExistingEmail(email){
+  for(let user in users){
+    if(users[user].email == email) return users[user];
+  }
+  return false;
+}
 
+
+
+app.post("/login", (req, res) => {
+  if(!emailExistsInDB(req.body.email)){
+    res.status(403).send("Email not in database");
+  }else if(userForAnExistingEmail(req.body.email) != req.body.password ){
+    res.status(403).send("Password incorrect");
+  } else {
+    res.cookie('user_id', userForAnExistingEmail(req.body.email).id);
+    res.redirect("/urls");
+  }
 })
 
 app.post("/logout", (req,res) =>{
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 })
 app.get("/", (req, res) => {
@@ -61,7 +74,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {username: req.cookies["username"]};
+  let templateVars = { user : users[req.cookies["user_id"]]};
   res.render("urls_new", templateVars);
 });
 
@@ -70,7 +83,7 @@ app.get("/urls.json", (req, res) => {res.json(urlDatabase);});
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id,
   urls: urlDatabase,
-  username: req.cookies["username"] };
+  user: users[req.cookies["user_id"]] };
   res.render("urls_show", templateVars);
 });
 
@@ -82,7 +95,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/urls", (req, res) => {
   // console.log(res.cookes);
   let templateVars = {urls: urlDatabase,
-  username: req.cookies["username"]};
+  user: users[req.cookies["user_id"]]};
 
   res.render("urls_index", templateVars);
 });
@@ -128,10 +141,19 @@ app.post("/register", (req, res) => {
       "password": password
     }
     res.cookie("user_id", userID);
-    console.log(users);
     res.redirect('/urls');
   }
  });
+
+app.get("/login", (req, res) => {
+  if(req.cookies["user_id"]){
+    res.redirect("/urls")
+  }else{
+    res.render("login");
+  }
+});
+
+
 app.get("/hello", (req, res) => {
   res.end("<html><body>Hello <b>World!!!!!!!</b></body></html>\n");
 });
