@@ -38,6 +38,13 @@ function generateRandomString(){
   return randomString;
 }
 
+function emailExistsInDB(email){
+  for(let user in users){
+    if(users[user].email == email) return true;
+  }
+  return false;
+}
+
 app.post("/login", (req, res) =>{
   // let loginName = req.body.username;
   res.cookie('username', req.body.username);
@@ -111,16 +118,20 @@ app.post("/register", (req, res) => {
   let userID = generateRandomString();
   let email = req.body.email;
   let password = req.body.password;
-  users[userID] = {
-    "id" : userID,
-    "email" : email,
-    "password": password
-  };
-
-  res.cookie("user_id", userID);
-  console.log(users);
-  res.redirect('/urls');
-})
+  if(email == "" || password == ""){
+    res.status(400).send("Password or email cannot be empty");
+  }else if(emailExistsInDB(email)){
+    res.status(400).send("Email already exist in database");
+  }else{users[userID] = {
+      "id" : userID,
+      "email" : email,
+      "password": password
+    }
+    res.cookie("user_id", userID);
+    console.log(users);
+    res.redirect('/urls');
+  }
+ });
 app.get("/hello", (req, res) => {
   res.end("<html><body>Hello <b>World!!!!!!!</b></body></html>\n");
 });
