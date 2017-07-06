@@ -106,6 +106,21 @@ app.get("/register", (req, res) => {
   // }else res.redirect('/urls');
   res.render("register");
 })
+
+app.post("/register", (req, res) => {
+  let userID = generateRandomString();
+  let email = req.body.email;
+  let password = req.body.password;
+  users[userID] = {
+    "id" : userID,
+    "email" : email,
+    "password": password
+  };
+
+  res.cookie("user_id", userID);
+  console.log(users);
+  res.redirect('/urls');
+})
 app.get("/hello", (req, res) => {
   res.end("<html><body>Hello <b>World!!!!!!!</b></body></html>\n");
 });
