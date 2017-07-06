@@ -13,6 +13,19 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+}
+
 function generateRandomString(){
   const alphaNumeric = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
   let randomString = "";
@@ -85,11 +98,19 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${randomString}`);       // Respond with 'Ok' (we will replace this)
 });
 
+app.get("/register", (req, res) => {
+  // if(req.cookies[userID] == undefined){
+  //   res.cookie('userID', "Guest");
+  //   let templateVars = { userID: req.cookies['userID']};
+  //   res.render("register", templateVars);
+  // }else res.redirect('/urls');
+  res.render("register");
+})
 app.get("/hello", (req, res) => {
-  console.log(res.cookes)
   res.end("<html><body>Hello <b>World!!!!!!!</b></body></html>\n");
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
