@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended: true}));
 
+const bcrypt = require("bcrypt");
+
 const urlDatabase = {
   "userRandomID": {
     "b2xVn2": "http://www.lighthouselabs.ca",
@@ -25,12 +27,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
  "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   }
 }
 
@@ -66,9 +68,16 @@ function urlsForUser(id){
 
 
 app.post("/login", (req, res) => {
+  // let passwordEntered = req.body.password;
+  // console.log(passwordEntered);
+
+  let password = req.body.password;
+  let passwordInDatabase = userForAnExistingEmail(req.body.email)["password"];
+  let passwordCheck = bcrypt.compareSync(password, passwordInDatabase);
+  // console.log({password}, {passwordInDatabase}, {passwordCheck});
   if(!emailExistsInDB(req.body.email)){
     res.status(403).send("Email not in database");
-  }else if(userForAnExistingEmail(req.body.email).password !== req.body.password ){
+  }else if(!passwordCheck){
     res.status(403).send("Password incorrect");
   } else {
     res.cookie('user_id', userForAnExistingEmail(req.body.email).id);
@@ -160,11 +169,16 @@ app.post("/register", (req, res) => {
   let userID = generateRandomString();
   let email = req.body.email;
   let password = req.body.password;
+  console.log("prehas", {password});
   if(email == "" || password == ""){
     res.status(400).send("Password or email cannot be empty");
   }else if(emailExistsInDB(email)){
     res.status(400).send("Email already exist in database");
-  }else{users[userID] = {
+  }else{
+
+    password = bcrypt.hashSync(password, 10);
+    console.log("register password", {password});
+    users[userID] = {
       "id" : userID,
       "email" : email,
       "password": password
