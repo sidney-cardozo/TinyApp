@@ -7,10 +7,19 @@
     <header>
       <% include partials/_header %>
     </header>
-     <h2 style="margin:150px 0px 0px 150px">ShortURL: <strong><%= shortURL%></strong></h2>
-     <form action="/urls/<%= shortURL%>" method="POST" style="margin:0px 0px 0px 150px">
-        <input id="newLongURL" type="text" name="newLongURL" placeholder="<%= urls[shortURL] %>" style="width: 300px">
-        <button type="update" value="Update" class="bg-warning">Update</button>
-      </form>
+    <% if(!user){%>
+
+            <strong>Please Login or Register!</strong>
+
+          <% } else if(!urls[shortURL]){ %>
+
+            <strong>The Link is not in your account</strong>
+          <% } else { %>
+           <h2 style="margin:150px 0px 0px 150px">ShortURL: <strong><%= shortURL%></strong></h2>
+           <form action="/urls/<%= shortURL%>" method="POST" style="margin:0px 0px 0px 150px">
+              <input id="newLongURL" type="text" name="newLongURL" placeholder="<%= urls[shortURL] %>" style="width: 300px">
+              <button type="update" value="Update" class="bg-warning">Update</button>
+            </form>
+       <% } %>
   </body>
 </html>

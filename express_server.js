@@ -8,10 +8,18 @@ const bodyParser = require("body-parser");
 app.use(cookieParser())
 app.use(bodyParser.urlencoded({extended: true}));
 
-var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+const urlDatabase = {
+  "userRandomID": {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    "9sm5xK": "http://www.google.com",
+    "qqw3ss": "http://www.facebook.com"
+  },
+ "user2RandomID": {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    "9sm5xK": "http://www.google.com"
+  }
+}
+
 
 const users = {
   "userRandomID": {
@@ -52,12 +60,15 @@ function userForAnExistingEmail(email){
   return false;
 }
 
+function urlsForUser(id){
+  return urlDatabase[id];
+}
 
 
 app.post("/login", (req, res) => {
   if(!emailExistsInDB(req.body.email)){
     res.status(403).send("Email not in database");
-  }else if(userForAnExistingEmail(req.body.email) != req.body.password ){
+  }else if(userForAnExistingEmail(req.body.email).password !== req.body.password ){
     res.status(403).send("Password incorrect");
   } else {
     res.cookie('user_id', userForAnExistingEmail(req.body.email).id);
@@ -83,35 +94,48 @@ app.get("/urls/new", (req, res) => {
 
 });
 
-app.get("/urls.json", (req, res) => {res.json(urlDatabase);});
-
 app.get("/urls/:id", (req, res) => {
+
+  // if(req.cookies["user_id"] && urlsForUser(req.cookies["user_id"])[req.params.id] ){
+  //   const validLongURL = urlsForUser(req.cookies["user_id"])[req.params.id]
+  // }
   let templateVars = { shortURL: req.params.id,
-  urls: urlDatabase,
+  urls: urlsForUser(req.cookies["user_id"]),
   user: users[req.cookies["user_id"]] };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  var longURL = "";
+  for (let user in urlDatabase){
+    for (let shortLink in urlDatabase[user]){
+      if(shortLink === req.params.shortURL ){
+        longURL = urlDatabase[user][shortLink];
+      }
+    }
+  }
+  if(longURL === "" ){
+    res.status(400).send("Invalid link");
+  }else{
+    res.redirect(longURL);
+  }
 });
 
 app.get("/urls", (req, res) => {
   // console.log(res.cookes);
-  let templateVars = {urls: urlDatabase,
+  let templateVars = {urls: urlsForUser(req.cookies["user_id"]),
   user: users[req.cookies["user_id"]]};
 
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
+  delete urlDatabase[req.cookies["user_id"]][req.params.id];
   res.redirect('/urls');
 })
 
 app.post("/urls/:id", (req, res) =>{
-  urlDatabase[req.params.id] = req.body.newLongURL;
+  urlDatabase[req.cookies["user_id"]][req.params.id] = req.body.newLongURL;
   res.redirect('/urls');
 })
 
@@ -119,7 +143,7 @@ app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
   let longURL = req.body.longURL;  // debug statement to see POST parameters
   // res.send("Ok");
-  urlDatabase[randomString] = longURL;
+  urlDatabase[req.cookies["user_id"]][randomString] = longURL;
   res.redirect(`/urls/${randomString}`);       // Respond with 'Ok' (we will replace this)
 });
 
